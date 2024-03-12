@@ -64,29 +64,30 @@ int scan(struct token *t) {
 
   // determine token
   switch (c) {
-  case EOF:
-    return (0);
-  case '+':
-    t->token = T_PLUS;
-    break;
-  case '-':
-    t->token = T_MINUS;
-    break;
-  case '*':
-    t->token = T_ASTERISK;
-    break;
-  case '/':
-    t->token = T_SLASH;
-    break;
-  default:
-    if (isdigit(c)) {
-      t->intvalue = scanint(c);
-      t->token = T_INTLIT;
+    case EOF:
+      t->token = T_EOF;
+      return (0);
+    case '+':
+      t->token = T_PLUS;
       break;
-    }
+    case '-':
+      t->token = T_MINUS;
+      break;
+    case '*':
+      t->token = T_ASTERISK;
+      break;
+    case '/':
+      t->token = T_SLASH;
+      break;
+    default:
+      if (isdigit(c)) {
+        t->intvalue = scanint(c);
+        t->token = T_INTLIT;
+        break;
+      }
 
-    printf("unrecognised character '%c' on line: %d\n", c, Line);
-    exit(1);
+      printf("unrecognised character '%c' on line: %d\n", c, Line);
+      exit(1);
   }
 
   return (1);

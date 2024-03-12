@@ -15,21 +15,9 @@ static void usage(char *prog) {
   exit(1);
 }
 
-char *tokstr[] = {"+", "-", "*", "/", "intlit"};
-
-static void scanfile() {
-  struct token T;
-
-  while (scan(&T)) {
-    printf("token: %s", tokstr[T.token]);
-    if (T.token == T_INTLIT) {
-      printf(", value: %d", T.intvalue);
-    }
-    printf("\n");
-  }
-}
-
 void main(int argc, char *argv[]) {
+  struct ASTnode *n;
+
   if (argc != 2) {
     usage(argv[0]);
   }
@@ -38,8 +26,11 @@ void main(int argc, char *argv[]) {
 
   if ((Infile = fopen(argv[1], "r")) == NULL) {
     fprintf(stderr, "unable to open %s: %s\n", argv[1], strerror(errno));
+    exit(1);
   }
 
-  scanfile();
+  scan(&Token);
+  n = binexpr();
+  printf("%d\n", interpretAST(n));
   exit(0);
 }
