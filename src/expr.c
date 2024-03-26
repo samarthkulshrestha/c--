@@ -29,23 +29,43 @@ static struct ASTnode *primary(void) {
       scan(&Token);
       return (n);
     default:
-      fprintf(stderr, "syntax error on line: %d\n", Line);
+      fprintf(stderr, "syntax error on line: %d, token: %d\n", Line, Token.token);
       exit(1);
   }
 }
 
-// Return an AST tree whose root is a binary operator
-struct ASTnode *binexpr(void) {
-  struct ASTnode *n, *left, *right;
-  int nodetype;
-  left = primary();
+// operator precedence for each token
+static int OpPrec[] = { 0, 10, 10, 20, 20, 0 };
 
-  if (Token.token == T_EOF)
+// check that we have a binary operator and return its precedence.
+static int op_precedence(int tokentype) {
+  int prec = OpPrec[tokentype];
+  if (prec == 0) {
+    fprintf(stderr, "syntax error on line %d, token %d\n", Line, tokentype);
+    exit(1);
+  }
+  return (prec);
+}
+
+// return an AST tree whose root is a binary operator
+struct ASTnode *binexpr(int ptp) {
+    struct ASTnode *left, *right;
+  int tokentype;
+
+  left = primary();
+  tokentype = Token.token;
+
+  if (tokentype == T_EOF)
     return (left);
 
-  nodetype = arithop(Token.token);
-  scan(&Token);
-  right = binexpr();
-  n = mkastnode(nodetype, left, right, 0);
-  return (n);
+  while (op_precedence(tokentype) > ptp) {
+    scan(&Token);
+    right = binexpr(OpPrec[tokentype]);
+    left = mkastnode(arithop(tokentype), left, right, 0);
+    tokentype = Token.token;
+    if (tokentype == T_EOF)
+      return (left);
+  }
+
+  return (left);
 }
